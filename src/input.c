@@ -106,6 +106,7 @@ void input()
 				}
 			break;
 			case SDL_JOYBUTTONDOWN:			/* Joystick button press. */
+#if !defined(PORT_RG353P) /* PortMaster maps buttons; preserve native analog axes. */
 				switch (event.jbutton.button)
 				{
 					case 0:
@@ -118,8 +119,10 @@ void input()
 					default:
 					break;
 				}
+#endif
 			break;
 			case SDL_JOYBUTTONUP:			/* Joystick button release. */
+#if !defined(PORT_RG353P)
 				switch (event.jbutton.button)
 				{
 					case 0:
@@ -132,6 +135,7 @@ void input()
 					default:
 					break;
 				}
+#endif
 			break;
 
 			default:
