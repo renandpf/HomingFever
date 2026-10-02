@@ -13,6 +13,7 @@ typedef enum objectType
 	OBJ_MISSILE_RED,
 	OBJ_MISSILE_BLUE,
 	OBJ_MISSILE_YELLOW,
+	OBJ_BULLET,
 	OBJ_CLOUD,
 	OBJ_SMOKE
 } objectType;

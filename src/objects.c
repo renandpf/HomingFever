@@ -71,6 +71,13 @@ object *objectTemplate(objectType type)
 			newObj.turnSpeed = 2.5f;
 			newObj.turnStep = 6;
 		break;
+		case OBJ_BULLET:
+			newObj.w = 3;
+			newObj.h = 3;
+			newObj.hitboxW = 3;
+			newObj.hitboxH = 3;
+			newObj.ttl = PLAYER_BULLET_TIME;
+		break;
 		case OBJ_CLOUD:
 			tilesetLoad(newObj.tiles, "data/gfx/cloud.bmp", 3, 3, 1, 1);
 			newObj.w = 3;
@@ -436,6 +443,19 @@ void objectDraw(object *obj)
 			divisor = 1;
 
 		angle = (360 - obj->angle)/divisor;
+
+		if (obj->type == OBJ_BULLET)
+		{
+			SDL_Rect r;
+
+			r.x = MOD((int)obj->x - camera.x, LEVEL_W);
+			r.y = MOD((int)obj->y - camera.y, LEVEL_H);
+			r.w = obj->w;
+			r.h = obj->h;
+
+			SDL_FillRect(screen, &r, getColor(255, 255, 128));
+			return;
+		}
 
 		if (obj->type == OBJ_CLOUD || obj->type == OBJ_SMOKE)
 			SDL_SetAlpha(obj->tiles->image, SDL_SRCALPHA, obj->ttl > 60 ? 255 : 256/60 * obj->ttl);

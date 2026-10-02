@@ -43,7 +43,7 @@ that revision r3 starts successfully and resolves the black screen.
 - D-pad or left stick left: rotate counterclockwise.
 - D-pad or left stick right: rotate clockwise.
 - Up/down: no steering effect. The ship continues moving forward.
-- A or B: skip intro / start game (both confirm for this first test package).
+- A or B: skip intro / start game / shoot.
 - Start: start game / pause / resume after the original two-second delay.
 - Select: return to title when not paused; press again to quit.
 - Start + Select: PortMaster emergency exit; may bypass saving.

@@ -27,6 +27,51 @@ int scoreBlinkingTimer;
 int gamePaused;
 int gamePausedTimer;
 
+static int objectIsMissile(object *obj)
+{
+	return obj && (obj->type == OBJ_MISSILE_RED || obj->type == OBJ_MISSILE_BLUE || obj->type == OBJ_MISSILE_YELLOW);
+}
+
+static int objectIsPassive(object *obj)
+{
+	return obj && (obj->type == OBJ_CLOUD || obj->type == OBJ_SMOKE);
+}
+
+static void gameAddObject(object *obj)
+{
+	objListHead = listElementPrepend(objListHead);
+	objListHead->item = malloc(sizeof(object));
+	memcpy(objListHead->item, obj, sizeof(object));
+}
+
+static void gameSpawnSmoke(float x, float y)
+{
+	object newObj;
+
+	objectLoad(&newObj, OBJ_SMOKE);
+	newObj.x = x - newObj.w/2 - 8 + (rand()%16);
+	newObj.y = y - newObj.h/2 - 8 + (rand()%16);
+
+	gameAddObject(&newObj);
+}
+
+static void gameShoot()
+{
+	object newObj;
+	float playerCenterX = playerObj->x + playerObj->w/2;
+	float playerCenterY = playerObj->y + playerObj->h/2;
+
+	objectLoad(&newObj, OBJ_BULLET);
+	newObj.angle = playerObj->angle;
+	newObj.x = playerCenterX - newObj.w/2 - (playerObj->w/2 + 3) * sineTable[playerObj->angle];
+	newObj.y = playerCenterY - newObj.h/2 - (playerObj->h/2 + 3) * sineTable[(playerObj->angle+90)%SINE_STEPS];
+	newObj.vx = -PLAYER_BULLET_SPEED * sineTable[playerObj->angle];
+	newObj.vy = -PLAYER_BULLET_SPEED * sineTable[(playerObj->angle+90)%SINE_STEPS];
+
+	gameAddObject(&newObj);
+	cooldownTime = PLAYER_COOLDOWN_TIME;
+}
+
 void gameUnload()
 {
 	objListHead = listElementDeleteAll(objListHead, objectItemDelete);
@@ -42,6 +87,7 @@ void gameUnload()
 	gameTime = 0;
 	gameOverTimer = 0;
 	playerPenaltyTimer = 0;
+	cooldownTime = 0;
 }
 
 void gameLoad()
@@ -62,6 +108,7 @@ void gameLoad()
 
 	gamePaused = 0;
 	gameTime = 0;
+	cooldownTime = 0;
 }
 
 void gameLogic()
@@ -151,6 +198,10 @@ void gameLogic()
 	{
 		playerObj->angle = MOD(playerObj->angle - PLAYER_ROTATION, SINE_STEPS);
 	}
+	if (cooldownTime > 0 && !gamePaused)
+		--cooldownTime;
+	if (keys[KEY_OK] && !gameOverTimer && !gamePaused && cooldownTime <= 0)
+		gameShoot();
 /*	if (keys[KEY_UP])*/
 /*	{*/
 /*	}*/
@@ -264,16 +315,37 @@ void gameLogic()
 				continue;
 			}
 
-			if (!(curObj->type == OBJ_CLOUD || curObj->type == OBJ_SMOKE || curObj2->type == OBJ_CLOUD || curObj2->type == OBJ_SMOKE))
+			if (!objectIsPassive(curObj) && !objectIsPassive(curObj2))
 			{
 				if (objectCollisionCheck(curObj, curObj2))
 				{
 					int i;
+					int curObjBullet = curObj->type == OBJ_BULLET;
+					int curObj2Bullet = curObj2->type == OBJ_BULLET;
+
+					if ((curObjBullet && objectIsMissile(curObj2)) || (curObj2Bullet && objectIsMissile(curObj)))
+					{
+						curObj->dispose = 1;
+						curObj2->dispose = 1;
+
+						for (i = 0; i < 5; ++i)
+						{
+							object *missile = curObjBullet ? curObj2 : curObj;
+
+							gameSpawnSmoke(missile->x + missile->w/2, missile->y + missile->h/2);
+						}
+
+						break;
+					}
+
+					if (curObjBullet || curObj2Bullet)
+					{
+						curNode2 = curNode2->next;
+						continue;
+					}
 
 					for (i = 0; i < 5; ++i)
 					{
-						object newObj;
-
 						curObj->dispose = curObj->type == OBJ_PLAYER ? 0 : 1;
 						curObj2->dispose = curObj2->type == OBJ_PLAYER ? 0 : 1;
 
@@ -293,13 +365,7 @@ void gameLogic()
 							}
 						}
 
-						objectLoad(&newObj, OBJ_SMOKE);
-						newObj.x = (curObj->x + curObj->w/2 - newObj.w/2) - 8 + (rand()%16);
-						newObj.y = (curObj->y + curObj->h/2 - newObj.h/2) - 8 + (rand()%16);
-
-						objListHead = listElementPrepend(objListHead);
-						objListHead->item = malloc(sizeof(object));
-						memcpy(objListHead->item, &newObj, sizeof(object));
+						gameSpawnSmoke(curObj->x + curObj->w/2, curObj->y + curObj->h/2);
 					}
 				}
 			}
@@ -378,7 +444,7 @@ void gameDraw()
 	if (!gamePaused && !bestTime && gameTime < 60*4)
 	{
 		dTextCentered(&gameFont, "MISSION:", SCREEN_H/2 + 30, ALPHA_OPAQUE, SHADOW_DROP);
-		dTextCentered(&gameFont, "Avoid missiles.", SCREEN_H/2 + 30 + (gameFont.h + gameFont.leading), ALPHA_OPAQUE, SHADOW_DROP);
+		dTextCentered(&gameFont, "Shoot or avoid missiles.", SCREEN_H/2 + 30 + (gameFont.h + gameFont.leading), ALPHA_OPAQUE, SHADOW_DROP);
 		dTextCentered(&gameFont, "Stay alive.", SCREEN_H/2 + 30 + (gameFont.h + gameFont.leading) * 2, ALPHA_OPAQUE, SHADOW_DROP);
 	}
 	if (gameOverTimer)
