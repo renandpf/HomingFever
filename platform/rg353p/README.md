@@ -1,6 +1,6 @@
 # Homing Fever — RG353P / ArkOS test port
 
-Experimental local package for Anbernic RG353P with ArkOS 2.0 (02092025),
+Experimental local package for Homing Fever v0.2.0 on Anbernic RG353P with ArkOS 2.0 (02092025),
 AArch64, glibc 2.30 and PortMaster. Startup and visible output were confirmed
 on the device with revision r3; full gameplay validation is still pending.
 Thanks to Artur Rojek (zear), the original game author.
