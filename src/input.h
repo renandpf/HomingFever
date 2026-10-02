@@ -15,7 +15,8 @@ enum KeyNames
 	KEY_RIGHT	= SDLK_RIGHT,
 	KEY_UP		= SDLK_UP,
 	KEY_DOWN	= SDLK_DOWN,
-	KEY_OK		= SDLK_LCTRL
+	KEY_OK		= SDLK_LCTRL,
+	KEY_JEDI	= SDLK_SPACE
 };
 
 typedef enum JoystickMode

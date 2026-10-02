@@ -26,6 +26,9 @@ int scoreBlinkingDraw;
 int scoreBlinkingTimer;
 int gamePaused;
 int gamePausedTimer;
+int jediUses;
+int jediTimer;
+int jediSlowdownStep;
 
 static int objectIsMissile(object *obj)
 {
@@ -72,6 +75,16 @@ static void gameShoot()
 	cooldownTime = PLAYER_COOLDOWN_TIME;
 }
 
+static void gameActivateJedi()
+{
+	if (jediUses <= 0 || jediTimer > 0)
+		return;
+
+	--jediUses;
+	jediTimer = PLAYER_JEDI_TIME;
+	jediSlowdownStep = 0;
+}
+
 void gameUnload()
 {
 	objListHead = listElementDeleteAll(objListHead, objectItemDelete);
@@ -85,9 +98,13 @@ void gameUnload()
 	}
 
 	gameTime = 0;
+	gameTicks = 0;
 	gameOverTimer = 0;
 	playerPenaltyTimer = 0;
 	cooldownTime = 0;
+	jediUses = 0;
+	jediTimer = 0;
+	jediSlowdownStep = 0;
 }
 
 void gameLoad()
@@ -108,7 +125,11 @@ void gameLoad()
 
 	gamePaused = 0;
 	gameTime = 0;
+	gameTicks = 0;
 	cooldownTime = 0;
+	jediUses = PLAYER_JEDI_USES;
+	jediTimer = 0;
+	jediSlowdownStep = 0;
 }
 
 void gameLogic()
@@ -119,19 +140,19 @@ void gameLogic()
 	{
 		++gamePausedTimer;
 	}
-	else
-	{
-		++gameTicks;
-	}
 
 	if (gameOverTimer)
 	{
 		if (!--gameOverTimer)
 		{
 			gameTime = 0;
+			gameTicks = 0;
 
 			playerPenaltyTimer = 0;
 			playerLastAngle = playerObj->angle;
+			jediUses = PLAYER_JEDI_USES;
+			jediTimer = 0;
+			jediSlowdownStep = 0;
 		}
 
 		if (!--scoreBlinkingTimer)
@@ -202,6 +223,21 @@ void gameLogic()
 		--cooldownTime;
 	if (keys[KEY_OK] && !gameOverTimer && !gamePaused && cooldownTime <= 0)
 		gameShoot();
+	if (keys[KEY_JEDI])
+	{
+		keys[KEY_JEDI] = 0;
+		if (!gameOverTimer && !gamePaused)
+			gameActivateJedi();
+	}
+	if (jediTimer > 0 && !gamePaused)
+	{
+		--jediTimer;
+		jediSlowdownStep = (jediSlowdownStep + 1) % PLAYER_JEDI_SLOWDOWN;
+		if (jediSlowdownStep)
+			return;
+	}
+	if (!gamePaused)
+		++gameTicks;
 /*	if (keys[KEY_UP])*/
 /*	{*/
 /*	}*/
@@ -211,7 +247,7 @@ void gameLogic()
 
 	if (!gameOverTimer && !gamePaused)
 	{
-		if (!(gameTime % (60*30)))
+		if (!(gameTicks % (60*30)))
 		{
 			int i;
 			int num = 4;
@@ -235,7 +271,7 @@ void gameLogic()
 		}
 		else
 		{
-			if (!((gameTime+GAME_OVER_TIME) % (60*6)))
+			if (!((gameTicks+GAME_OVER_TIME) % (60*6)))
 			{
 				int i;
 				int max = 1 + (gameTime/1800);
@@ -258,7 +294,7 @@ void gameLogic()
 					memcpy(objListHead->item, &newObj, sizeof(object));
 				}
 			}
-			if (!(gameTime % (30*23)))
+			if (!(gameTicks % (30*23)))
 			{
 				int i;
 				int num = (rand() % 2) + 1;
@@ -440,6 +476,18 @@ void gameDraw()
 	sprintf(debugStr, "Obj: %u\n(%03d,%03d)", listLength(objListHead), (int)playerObj->x, (int)playerObj->y);
 	dText(&gameFont, debugStr, gameFont.tracking + 1, SCREEN_H - (gameFont.h + gameFont.leading) * 2 - 1, ALPHA_OPAQUE, SHADOW_DROP);
 #endif
+
+	if (!gameOverTimer)
+	{
+		char jediStr[20];
+
+		if (jediTimer > 0)
+			sprintf(jediStr, "JEDI: %d %d", jediUses, (jediTimer + FPS - 1) / FPS);
+		else
+			sprintf(jediStr, "JEDI: %d", jediUses);
+
+		dText(&gameFont, jediStr, gameFont.tracking + 1, gameFont.h + gameFont.leading, ALPHA_OPAQUE, SHADOW_DROP);
+	}
 
 	if (!gamePaused && !bestTime && gameTime < 60*4)
 	{

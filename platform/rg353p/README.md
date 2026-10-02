@@ -44,6 +44,7 @@ that revision r3 starts successfully and resolves the black screen.
 - D-pad or left stick right: rotate clockwise.
 - Up/down: no steering effect. The ship continues moving forward.
 - A or B: skip intro / start game / shoot.
+- X: activate Jedi mode, slowing gameplay for 3 seconds. Each run has 3 uses.
 - Start: start game / pause / resume after the original two-second delay.
 - Select: return to title when not paused; press again to quit.
 - Start + Select: PortMaster emergency exit; may bypass saving.
