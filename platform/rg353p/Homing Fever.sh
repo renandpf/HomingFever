@@ -3,7 +3,7 @@
 GAMEDIR="$(cd -- "$(dirname -- "$0")" && pwd)/homingfever"
 cd "$GAMEDIR" || exit 1
 exec > "$GAMEDIR/log.txt" 2>&1
-echo '[launcher r3] Starting Homing Fever'
+echo '[launcher r4] Starting Homing Fever'
 printf '[launcher] Game directory: %s\n' "$GAMEDIR"
 controlfolder=""
 for candidate in "$(dirname -- "$GAMEDIR")/../tools/PortMaster" /roms2/tools/PortMaster /roms/tools/PortMaster /opt/system/Tools/PortMaster /opt/tools/PortMaster; do
@@ -51,7 +51,7 @@ fi
 cd "$GAMEDIR" || exit 1
 printf '[launcher] SDL_VIDEODRIVER=%s DISPLAY=%s\n' "${SDL_VIDEODRIVER:-auto}" "${DISPLAY:-unset}"
 if [ ! -f "$GAMEDIR/libs.aarch64/libSDL-1.2.so.0" ]; then
-    echo '[launcher] Missing bundled SDL compatibility library; extract the full r3 ZIP.'
+    echo '[launcher] Missing bundled SDL compatibility library; extract the full r4 ZIP.'
     exit 1
 fi
 echo '[launcher] Executing game with bundled sdl12-compat 1.2.68' 

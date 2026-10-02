@@ -15,6 +15,14 @@ void input()
 {
 	while(SDL_PollEvent(&event))
 	{
+#if defined(PORT_RG353P)
+		/* PortMaster maps both D-pad and stick to relative turn keys.
+		 * Ignore native events so axes cannot steer toward an absolute
+		 * heading or overwrite the mapped key state. */
+		if (event.type == SDL_JOYAXISMOTION || event.type == SDL_JOYHATMOTION ||
+		    event.type == SDL_JOYBUTTONDOWN || event.type == SDL_JOYBUTTONUP)
+			continue;
+#endif
 		switch(event.type)
 		{
 			case SDL_QUIT:

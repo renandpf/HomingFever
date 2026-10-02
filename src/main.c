@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	int i;
 #if defined(PORT_RG353P)
 	setvbuf(stdout, NULL, _IONBF, 0);
-	fprintf(stderr, "[game r3] Process started\n");
+	fprintf(stderr, "[game r4] Process started\n");
 #endif
 	quit = 0;
 

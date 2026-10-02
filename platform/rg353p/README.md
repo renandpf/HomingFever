@@ -40,16 +40,19 @@ process receives the private library path; system libraries are not replaced.
 Video and joystick initialization are logged separately. The user confirmed
 that revision r3 starts successfully and resolves the black screen.
 
-- D-pad left/right: turn (native joystick hat).
-- Left analog stick: steer toward the selected direction (native axes 0/1).
+- D-pad or left stick left: rotate counterclockwise.
+- D-pad or left stick right: rotate clockwise.
+- Up/down: no steering effect. The ship continues moving forward.
 - A or B: skip intro / start game (both confirm for this first test package).
 - Start: start game / pause / resume after the original two-second delay.
 - Select: return to title when not paused; press again to quit.
 - Start + Select: PortMaster emergency exit; may bypass saving.
 
-PortMaster gptokeyb maps buttons to keyboard events; native joystick button
-handling is disabled only for this build to prevent duplicate actions.
-Hat/axis assignment and button mapping must be verified on the actual device.
+Revision r4 uses PortMaster gptokeyb for both buttons and relative steering.
+Native joystick axis, hat and button events are ignored only for this build,
+preventing absolute analog steering and conflicting input sources. Existing
+JOY_MODE settings do not restore absolute steering. Other platforms retain
+the original controls. The r4 mapping still needs device validation.
 Configuration (`game.cfg`), record (`score.dat`) and launch log (`log.txt`)
 are stored in `homingfever/`. Updating the ZIP does not overwrite saves.
 
